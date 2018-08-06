@@ -4,7 +4,7 @@ const serveStatic = require('serve-static')
 const gpio=require("./gpio")
 
 // Serve up public/ftp folder
-const serve = serveStatic('public/ftp', {'index': ['index.html']})
+const serve = serveStatic('public', {'index': ['index.html']})
  
 // Create server
 const server = http.createServer(function onRequest (req, res) {
@@ -24,23 +24,27 @@ io.on('connection', function (socket) {
     if (session) {
       fn(false)
     }else{
-      fn(true)
-      session=socket.id
+      gpio.reset().then(()=>{
+        fn(true)
+        session=socket.id
+      })
     }
   })
   socket.on("endSession",fn=>{
     if (session!==socket.id) {
       return fn(false)
     }
-    session=null
-    fn(true)
+    gpio.reset().then(()=>{
+      session=null
+      fn(true)
+    })
   })
   socket.on("enableMagnet",fn=>{
     if (session!==socket.id) {
       return fn(false)
     }
     
-    setTimeout(()=>fn(true),500)
+    gpio.enableMagnet().then(()=>fn(true))
   })
   socket.on("startTime",fn=>{
     if (session!==socket.id) {
@@ -50,7 +54,9 @@ io.on('connection', function (socket) {
   })
   socket.on('disconnect', (reason) => {
     if (session===socket.id) {
-      session=null
+      gpio.reset().then(()=>{
+        session=null
+      })
     }
   });
   
