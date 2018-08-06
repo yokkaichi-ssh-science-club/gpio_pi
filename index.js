@@ -11,9 +11,11 @@ const server = http.createServer(function onRequest (req, res) {
   serve(req, res, finalhandler(req, res))
 })
 
-const io= require("socket.io")(server)
+server.listen(80)
+
+const io= require("socket.io")(5000)
 // Listen
-server.listen(5000)
+
 
 gpio.io=io
 
